@@ -22,6 +22,9 @@
 # or visit www.oracle.com if you need additional information or have any
 # questions.
 #
+# ===========================================================================
+# (c) Copyright IBM Corp. 2021, 2021 All Rights Reserved
+# ===========================================================================
 
 default: all
 
@@ -185,6 +188,16 @@ $(JDK_IMAGE_DIR)/lib/src.zip: $(SUPPORT_OUTPUTDIR)/src.zip
 	$(install-file)
 
 JDK_TARGETS += $(JDK_IMAGE_DIR)/lib/src.zip
+
+IBM_JDK_README ?= $(wildcard $(TOPDIR)/README.txt)
+
+$(eval $(call SetupCopyFiles, JDK_COPY_README, \
+      DEST := $(JDK_IMAGE_DIR)/, \
+      FILES := $(IBM_JDK_README), \
+      FLATTEN := true, \
+))
+
+JDK_TARGETS += $(JDK_COPY_README)
 
 ################################################################################
 # /demo dir

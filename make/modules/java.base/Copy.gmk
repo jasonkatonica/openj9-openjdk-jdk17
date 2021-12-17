@@ -22,6 +22,9 @@
 # or visit www.oracle.com if you need additional information or have any
 # questions.
 #
+# ===========================================================================
+# (c) Copyright IBM Corp. 2021, 2021 All Rights Reserved
+# ===========================================================================
 
 include CopyCommon.gmk
 include Modules.gmk
@@ -211,17 +214,28 @@ endif
 
 # The license files may not be present if the source has been obtained using a
 # different license.
-JDK_LICENSE ?= $(wildcard $(TOPDIR)/LICENSE)
-JDK_NOTICE  ?= $(wildcard $(TOPDIR)/ASSEMBLY_EXCEPTION)
-JDK_ADDITIONAL_LICENSE_INFO  ?= $(wildcard $(TOPDIR)/ADDITIONAL_LICENSE_INFO)
+IBM_JDK_COPYRIGHT ?= $(wildcard $(TOPDIR)/Copyright)
 
-$(eval $(call SetupCopyFiles, COPY_JDK_NOTICES, \
-    FILES := $(JDK_LICENSE) $(JDK_NOTICE) $(JDK_ADDITIONAL_LICENSE_INFO), \
+
+$(eval $(call SetupCopyFiles, COPY_JDK_COPYRIGHT, \
+    FILES := $(IBM_JDK_COPYRIGHT), \
     DEST := $(COMMON_LEGAL_DST_DIR), \
     FLATTEN := true, \
 ))
 
-TARGETS += $(COPY_JDK_NOTICES)
+
+IBM_JDK_TRANSLATED_FILES ?= $(wildcard $(TOPDIR)/license/*)
+
+$(COPY_JDK_TRANSLATED_LICENSE): $(MKDIR) -p $(COMMON_LEGAL_DST_DIR)/license
+$(eval $(call SetupCopyFiles, COPY_JDK_TRANSLATED_LICENSE, \
+    FILES := $(IBM_JDK_TRANSLATED_FILES), \
+    DEST := $(COMMON_LEGAL_DST_DIR)/license, \
+    FLATTEN := true, \
+))
+
+
+TARGETS += $(COPY_JDK_COPYRIGHT)
+TARGETS += $(COPY_JDK_TRANSLATED_LICENSE)
 
 ################################################################################
 #
