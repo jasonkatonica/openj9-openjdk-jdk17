@@ -333,6 +333,7 @@ module java.base {
         jdk.jartool;
     exports sun.security.rsa to
         jdk.crypto.cryptoki;
+        openjceplus;
     exports sun.security.timestamp to
         jdk.jartool;
     exports sun.security.tools to
