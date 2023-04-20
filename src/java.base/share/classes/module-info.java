@@ -217,6 +217,7 @@ module java.base {
         jdk.unsupported,
         jdk.internal.vm.ci,
         jdk.incubator.foreign;
+        openjceplus;
     exports jdk.internal.module to
         java.instrument,
         java.management.rmi,
