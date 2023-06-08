@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2023 All Rights Reserved
+# (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -17,35 +17,33 @@
 # You should have received a copy of the GNU General Public License version
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
 # ===========================================================================
-#
-# exclude all source directories
-/omr
-/openj9
-/OpenJCEPlus
-/openssl
-# exclude optional eclipse project file
-/.project
 
-# openjdk gitignore
-/build/
-/dist/
-/.idea/
-/.vscode/
-/nbproject/
-nbproject/private/
-/webrev
-/.src-rev
-/.jib/
-.DS_Store
-.metadata/
-.recommenders/
-test/nashorn/script/external
-test/nashorn/lib
-NashornProfile.txt
-**/JTreport/**
-**/JTwork/**
-/src/utils/LogCompilation/target/
-/.project/
-/.settings/
-/compile_commands.json
-/.cache
+include $(TOPDIR)/closed/CopySupport.gmk
+
+ifeq (true,$(BUILD_OPENJCEPLUS))
+  # Copy OpenJCEPlus native libraries
+  $(eval $(call SetupCopyFiles, COPY_JGSKIT_LIBS, \
+      SRC := $(OPENJCEPLUS_TOPDIR)/target, \
+      FILES := $(filter %.dll %.so %.x, $(call FindFiles, $(OPENJCEPLUS_TOPDIR)/target)), \
+      FLATTEN := true, \
+      DEST := $(LIB_DST_DIR), \
+  ))
+
+  TARGETS += $(COPY_JGSKIT_LIBS)
+
+  # Bundle GSKIT library
+  ICC_DIR := $(TOPDIR)/OpenJCEPlus/icc/jgsk_sdk/lib64
+  ifeq ($(call isTargetOs, windows), true)
+    ICC_SUB_DIR := modules_cmds
+  else
+    ICC_SUB_DIR := modules_libs
+  endif
+
+  $(eval $(call SetupCopyFiles, COPY_ICC, \
+      SRC := $(ICC_DIR), \
+      DEST := $(SUPPORT_OUTPUTDIR)/$(ICC_SUB_DIR)/$(MODULE), \
+      FILES := $(call FindFiles, $(ICC_DIR)), \
+  ))
+
+  TARGETS += $(COPY_ICC)
+endif # BUILD_OPENJCEPLUS

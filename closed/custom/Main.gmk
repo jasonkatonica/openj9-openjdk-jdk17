@@ -119,3 +119,5 @@ ifneq (,$(HEALTHCENTER_JAR))
   # The content must be extracted before module-info can be compiled.
   ibm.healthcenter-java : ibm.healthcenter-copy
 endif # HEALTHCENTER_JAR
+
+openjceplus-copy : openjceplus-libs

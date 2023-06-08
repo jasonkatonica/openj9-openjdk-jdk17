@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
  * ===========================================================================
  */
 
@@ -182,7 +182,8 @@ module java.base {
         jdk.compiler,
         jdk.jlink;
     exports jdk.internal.logger to
-        java.logging;
+        java.logging,
+        openjceplus;
     exports jdk.internal.org.objectweb.asm to
         jdk.jartool,
         jdk.jfr,
@@ -216,7 +217,8 @@ module java.base {
         jdk.nio.mapmode,
         jdk.unsupported,
         jdk.internal.vm.ci,
-        jdk.incubator.foreign;
+        jdk.incubator.foreign,
+        openjceplus;
     exports jdk.internal.module to
         java.instrument,
         java.management.rmi,
@@ -280,7 +282,8 @@ module java.base {
         jdk.sctp;
     exports sun.net.www to
         java.net.http,
-        jdk.jartool;
+        jdk.jartool,
+        openjceplus;
     exports sun.net.www.protocol.http to
         java.security.jgss;
     exports sun.nio.ch to
@@ -310,9 +313,11 @@ module java.base {
         jdk.crypto.ec,
         jdk.incubator.foreign;
     exports sun.security.internal.interfaces to
-        jdk.crypto.cryptoki;
+        jdk.crypto.cryptoki,
+        openjceplus;
     exports sun.security.internal.spec to
-        jdk.crypto.cryptoki;
+        jdk.crypto.cryptoki,
+        openjceplus;
     exports sun.security.jca to
         java.smartcardio,
         jdk.crypto.ec,
@@ -348,7 +353,8 @@ module java.base {
         jdk.crypto.cryptoki,
         jdk.jartool,
         jdk.security.auth,
-        jdk.security.jgss;
+        jdk.security.jgss,
+        openjceplus;
     exports sun.security.util.math to
         jdk.crypto.ec;
     exports sun.security.util.math.intpoly to
@@ -368,7 +374,8 @@ module java.base {
     exports sun.util.logging to
         java.desktop,
         java.logging,
-        java.prefs;
+        java.prefs,
+        openjceplus;
     exports sun.util.resources to
         jdk.localedata;
     exports jdk.internal.invoke to
