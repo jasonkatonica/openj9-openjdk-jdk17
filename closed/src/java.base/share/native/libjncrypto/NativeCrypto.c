@@ -178,6 +178,8 @@ typedef void* OSSL_OPENSSL_free_t(void* addr);
 typedef int OSSL_CRYPTO_THREADID_set_callback_t(void (*threadid_func)(CRYPTO_THREADID *));
 typedef void OSSL_CRYPTO_set_locking_callback_t(void (*func)(int mode, int type, const char *file, int line));
 
+typedef OSSL_cipher_t* OSSL_cipher_fetch_t(OSSL_LIB_CTX *, const char *, const char *);
+
 static int thread_setup();
 #if defined(WINDOWS)
 static void win32_locking_callback(int mode, int type, const char *file, int line);
@@ -224,11 +226,20 @@ OSSL_CIPHER_CTX_set_padding_t* OSSL_CIPHER_CTX_set_padding;
 OSSL_CipherUpdate_t* OSSL_CipherUpdate;
 OSSL_CipherFinal_ex_t* OSSL_CipherFinal_ex;
 
+/* Define pointer for OpenSSL cipher fetching functions. */
+OSSL_cipher_fetch_t* OSSL_cipher_fetch;
+
 /* Define pointers for OpenSSL functions to handle GCM algorithm. */
-OSSL_cipher_t* OSSL_aes_128_gcm;
-OSSL_cipher_t* OSSL_aes_192_gcm;
-OSSL_cipher_t* OSSL_aes_256_gcm;
+//OSSL_cipher_t* OSSL_aes_128_gcm;
+//OSSL_cipher_t* OSSL_aes_192_gcm;
+//OSSL_cipher_t* OSSL_aes_256_gcm;
 OSSL_CIPHER_CTX_ctrl_t* OSSL_CIPHER_CTX_ctrl;
+
+/* Define various cipher pointers */
+OSSL_cipher_t* evp_aesgcm_cipher_128;
+OSSL_cipher_t* evp_aesgcm_cipher_192;
+OSSL_cipher_t* evp_aesgcm_cipher_256;
+
 OSSL_DecryptInit_ex_t* OSSL_DecryptInit_ex;
 OSSL_DecryptUpdate_t* OSSL_DecryptUpdate;
 OSSL_DecryptFinal_t* OSSL_DecryptFinal;
@@ -470,9 +481,9 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
     OSSL_CIPHER_CTX_set_padding = (OSSL_CIPHER_CTX_set_padding_t*)find_crypto_symbol(crypto_library, "EVP_CIPHER_CTX_set_padding");
     OSSL_CipherUpdate = (OSSL_CipherUpdate_t*)find_crypto_symbol(crypto_library, "EVP_CipherUpdate");
     OSSL_CipherFinal_ex = (OSSL_CipherFinal_ex_t*)find_crypto_symbol(crypto_library, "EVP_CipherFinal_ex");
-    OSSL_aes_128_gcm = (OSSL_cipher_t*)find_crypto_symbol(crypto_library, "EVP_aes_128_gcm");
-    OSSL_aes_192_gcm = (OSSL_cipher_t*)find_crypto_symbol(crypto_library, "EVP_aes_192_gcm");
-    OSSL_aes_256_gcm = (OSSL_cipher_t*)find_crypto_symbol(crypto_library, "EVP_aes_256_gcm");
+    //OSSL_aes_128_gcm = (OSSL_cipher_t*)find_crypto_symbol(crypto_library, "EVP_aes_128_gcm");
+    //OSSL_aes_192_gcm = (OSSL_cipher_t*)find_crypto_symbol(crypto_library, "EVP_aes_192_gcm");
+    //OSSL_aes_256_gcm = (OSSL_cipher_t*)find_crypto_symbol(crypto_library, "EVP_aes_256_gcm");
     OSSL_CIPHER_CTX_ctrl = (OSSL_CIPHER_CTX_ctrl_t*)find_crypto_symbol(crypto_library, "EVP_CIPHER_CTX_ctrl");
     OSSL_DecryptInit_ex = (OSSL_DecryptInit_ex_t*)find_crypto_symbol(crypto_library, "EVP_DecryptInit_ex");
     OSSL_DecryptUpdate = (OSSL_DecryptUpdate_t*)find_crypto_symbol(crypto_library, "EVP_DecryptUpdate");
@@ -598,6 +609,13 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
     /* Load the functions symbols for OpenSSL PBE algorithm. */
     OSSL_PKCS12_key_gen = (OSSL_PKCS12_key_gen_t*)find_crypto_symbol(crypto_library, "PKCS12_key_gen_uni");
 
+    /* Load the function pointer for OpenSSL EVP_Cipher_fetch API. */
+    OSSL_cipher_fetch = (OSSL_cipher_fetch_t*)find_crypto_symbol(crypto_library, "EVP_CIPHER_fetch");
+    if (NULL == OSSL_cipher_fetch) {
+            fprintf(stderr, "OSSL_cipher_fetch function pointer is NULL.");
+            fflush(stderr);
+    }
+
     if ((NULL == OSSL_error_string) ||
         (NULL == OSSL_error_string_n) ||
         (NULL == OSSL_get_error) ||
@@ -622,9 +640,10 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
         (NULL == OSSL_CIPHER_CTX_set_padding) ||
         (NULL == OSSL_CipherUpdate) ||
         (NULL == OSSL_CipherFinal_ex) ||
-        (NULL == OSSL_aes_128_gcm) ||
-        (NULL == OSSL_aes_192_gcm) ||
-        (NULL == OSSL_aes_256_gcm) ||
+        //(NULL == OSSL_aes_128_gcm) ||
+        //(NULL == OSSL_aes_192_gcm) ||
+        //(NULL == OSSL_aes_256_gcm) ||
+        (NULL == OSSL_cipher_fetch) ||
         (NULL == OSSL_CIPHER_CTX_ctrl) ||
         (NULL == OSSL_DecryptInit_ex) ||
         (NULL == OSSL_DecryptUpdate) ||
@@ -712,6 +731,39 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
                 return -1;
             }
         }
+
+        /*
+        Make use of the EVP_cipher_fetch API to pre-fetch all the necessary ciphers needed below. This is being 
+        done during load time for performance reasons. These operations are found to be expensive requiring locking 
+        when making use of the OpenSSL version 3.x libraries along with additional path length.
+        */
+        fprintf(stderr, "Getting openssl ciphers.\n");
+        fflush(stderr);
+        evp_aesgcm_cipher_128 = (void*)(*OSSL_cipher_fetch)((OSSL_LIB_CTX *)NULL, (const char*)"AES-128-GCM", (const char*)NULL);
+        evp_aesgcm_cipher_192 = (void*)(*OSSL_cipher_fetch)((OSSL_LIB_CTX *)NULL, (const char*)"AES-192-GCM", (const char*)NULL);
+        evp_aesgcm_cipher_256 = (void*)(*OSSL_cipher_fetch)((OSSL_LIB_CTX *)NULL, (const char*)"AES-256-GCM", (const char*)NULL);
+        if (NULL == evp_aesgcm_cipher_128)  {
+            fprintf(stderr, "evp_aesgcm_cipher_128 cipher is null.n");
+            fflush(stderr);
+        } else {
+            fprintf(stderr, "evp_aesgcm_cipher_128 cipher found.\n");
+            fflush(stderr);
+        }
+        if (NULL == evp_aesgcm_cipher_192) {
+            fprintf(stderr, "evp_aesgcm_cipher_192 cipher is null.n");
+            fflush(stderr);
+        } else {
+            fprintf(stderr, "evp_aesgcm_cipher_192 cipher found.\n");
+            fflush(stderr);
+        }     
+        if (NULL == evp_aesgcm_cipher_256) {
+            fprintf(stderr, "evp_aesgcm_cipher_256 cipher is null.n");
+            fflush(stderr);
+        } else {
+            fprintf(stderr, "evp_aesgcm_cipher_256 cipher found.\n");
+            fflush(stderr);
+        }
+
         return ossl_ver;
     }
 }
@@ -1345,13 +1397,16 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_GCMEncrypt
     if (newKeyLen) {
         switch (keyLen) {
         case 16:
-            evp_gcm_cipher = (*OSSL_aes_128_gcm)();
+            //evp_gcm_cipher = (*OSSL_aes_128_gcm)();
+            evp_gcm_cipher = (EVP_CIPHER*)evp_aesgcm_cipher_128;
             break;
         case 24:
-            evp_gcm_cipher = (*OSSL_aes_192_gcm)();
+            //evp_gcm_cipher = (*OSSL_aes_192_gcm)();
+            evp_gcm_cipher = (EVP_CIPHER*)evp_aesgcm_cipher_192;
             break;
         case 32:
-            evp_gcm_cipher = (*OSSL_aes_256_gcm)();
+            //evp_gcm_cipher = (*OSSL_aes_256_gcm)();
+            evp_gcm_cipher = (EVP_CIPHER*)evp_aesgcm_cipher_256;
             break;
         default:
             break;
@@ -1483,13 +1538,16 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_GCMDecrypt
     if (newKeyLen) {
         switch (keyLen) {
         case 16:
-            evp_gcm_cipher = (*OSSL_aes_128_gcm)();
+            //evp_gcm_cipher = (*OSSL_aes_128_gcm)();
+            evp_gcm_cipher = (EVP_CIPHER*)evp_aesgcm_cipher_128;
             break;
         case 24:
-            evp_gcm_cipher = (*OSSL_aes_192_gcm)();
+            //evp_gcm_cipher = (*OSSL_aes_192_gcm)();
+            evp_gcm_cipher = (EVP_CIPHER*)evp_aesgcm_cipher_192;
             break;
         case 32:
-            evp_gcm_cipher = (*OSSL_aes_256_gcm)();
+            //evp_gcm_cipher = (*OSSL_aes_256_gcm)();
+            evp_gcm_cipher = (EVP_CIPHER*)evp_aesgcm_cipher_256;
             break;
         default:
             break;
