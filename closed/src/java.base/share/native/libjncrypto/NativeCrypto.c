@@ -202,11 +202,11 @@ static OSSL_CRYPTO_THREADID_set_callback_t* OSSL_CRYPTO_THREADID_set_callback = 
 static OSSL_CRYPTO_set_locking_callback_t* OSSL_CRYPTO_set_locking_callback = NULL;
 
 /* Define pointers for OpenSSL functions to handle Message Digest algorithms. */
-OSSL_sha_t* OSSL_sha1;
-OSSL_sha_t* OSSL_sha256;
-OSSL_sha_t* OSSL_sha224;
-OSSL_sha_t* OSSL_sha384;
-OSSL_sha_t* OSSL_sha512;
+//OSSL_sha_t* OSSL_sha1;
+//OSSL_sha_t* OSSL_sha256;
+//OSSL_sha_t* OSSL_sha224;
+//OSSL_sha_t* OSSL_sha384;
+//OSSL_sha_t* OSSL_sha512;
 OSSL_MD_CTX_new_t* OSSL_MD_CTX_new;
 OSSL_DigestInit_ex_t* OSSL_DigestInit_ex;
 OSSL_MD_CTX_copy_ex_t* OSSL_MD_CTX_copy_ex;
@@ -235,10 +235,15 @@ OSSL_cipher_fetch_t* OSSL_cipher_fetch;
 //OSSL_cipher_t* OSSL_aes_256_gcm;
 OSSL_CIPHER_CTX_ctrl_t* OSSL_CIPHER_CTX_ctrl;
 
-/* Define various cipher pointers */
+/* Define various cryptographic cipher pointers */
 OSSL_cipher_t* evp_aesgcm_cipher_128;
 OSSL_cipher_t* evp_aesgcm_cipher_192;
 OSSL_cipher_t* evp_aesgcm_cipher_256;
+OSSL_sha_t* evp_cipher_sha1;
+OSSL_sha_t* evp_cipher_sha224;
+OSSL_sha_t* evp_cipher_sha256;
+OSSL_sha_t* evp_cipher_sha384;
+OSSL_sha_t* evp_cipher_sha512;
 
 OSSL_DecryptInit_ex_t* OSSL_DecryptInit_ex;
 OSSL_DecryptUpdate_t* OSSL_DecryptUpdate;
@@ -450,11 +455,11 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
     }
 
     /* Load the function symbols for OpenSSL Message Digest algorithms. */
-    OSSL_sha1 = (OSSL_sha_t*)find_crypto_symbol(crypto_library, "EVP_sha1");
-    OSSL_sha256 = (OSSL_sha_t*)find_crypto_symbol(crypto_library, "EVP_sha256");
-    OSSL_sha224 = (OSSL_sha_t*)find_crypto_symbol(crypto_library, "EVP_sha224");
-    OSSL_sha384 = (OSSL_sha_t*)find_crypto_symbol(crypto_library, "EVP_sha384");
-    OSSL_sha512 = (OSSL_sha_t*)find_crypto_symbol(crypto_library, "EVP_sha512");
+    //OSSL_sha1 = (OSSL_sha_t*)find_crypto_symbol(crypto_library, "EVP_sha1");
+    //OSSL_sha256 = (OSSL_sha_t*)find_crypto_symbol(crypto_library, "EVP_sha256");
+    //OSSL_sha224 = (OSSL_sha_t*)find_crypto_symbol(crypto_library, "EVP_sha224");
+    //OSSL_sha384 = (OSSL_sha_t*)find_crypto_symbol(crypto_library, "EVP_sha384");
+    //OSSL_sha512 = (OSSL_sha_t*)find_crypto_symbol(crypto_library, "EVP_sha512");
 
     if (ossl_ver >= OPENSSL_VERSION_1_1_0) {
         OSSL_MD_CTX_new = (OSSL_MD_CTX_new_t*)find_crypto_symbol(crypto_library, "EVP_MD_CTX_new");
@@ -619,11 +624,11 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
     if ((NULL == OSSL_error_string) ||
         (NULL == OSSL_error_string_n) ||
         (NULL == OSSL_get_error) ||
-        (NULL == OSSL_sha1) ||
-        (NULL == OSSL_sha256) ||
-        (NULL == OSSL_sha224) ||
-        (NULL == OSSL_sha384) ||
-        (NULL == OSSL_sha512) ||
+        //(NULL == OSSL_sha1) ||
+        //(NULL == OSSL_sha256) ||
+        //(NULL == OSSL_sha224) ||
+        //(NULL == OSSL_sha384) ||
+        //(NULL == OSSL_sha512) ||
         (NULL == OSSL_MD_CTX_new) ||
         (NULL == OSSL_MD_CTX_reset) ||
         (NULL == OSSL_MD_CTX_free) ||
@@ -742,6 +747,13 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
         evp_aesgcm_cipher_128 = (void*)(*OSSL_cipher_fetch)((OSSL_LIB_CTX *)NULL, (const char*)"AES-128-GCM", (const char*)NULL);
         evp_aesgcm_cipher_192 = (void*)(*OSSL_cipher_fetch)((OSSL_LIB_CTX *)NULL, (const char*)"AES-192-GCM", (const char*)NULL);
         evp_aesgcm_cipher_256 = (void*)(*OSSL_cipher_fetch)((OSSL_LIB_CTX *)NULL, (const char*)"AES-256-GCM", (const char*)NULL);
+
+        evp_cipher_sha1 = (void*)(*OSSL_cipher_fetch)((OSSL_LIB_CTX *)NULL, (const char*)"SHA1", (const char*)NULL);
+        evp_cipher_sha224 = (void*)(*OSSL_cipher_fetch)((OSSL_LIB_CTX *)NULL, (const char*)"SHA2-224", (const char*)NULL);
+        evp_cipher_sha256 = (void*)(*OSSL_cipher_fetch)((OSSL_LIB_CTX *)NULL, (const char*)"SHA2-256", (const char*)NULL);
+        evp_cipher_sha384 = (void*)(*OSSL_cipher_fetch)((OSSL_LIB_CTX *)NULL, (const char*)"SHA2-384", (const char*)NULL);
+        evp_cipher_sha512 = (void*)(*OSSL_cipher_fetch)((OSSL_LIB_CTX *)NULL, (const char*)"SHA2-512", (const char*)NULL);
+
         if (NULL == evp_aesgcm_cipher_128)  {
             fprintf(stderr, "evp_aesgcm_cipher_128 cipher is null.n");
             fflush(stderr);
@@ -763,6 +775,42 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
             fprintf(stderr, "evp_aesgcm_cipher_256 cipher found.\n");
             fflush(stderr);
         }
+        if (NULL == evp_cipher_sha1) {
+            fprintf(stderr, "evp_cipher_sha1 cipher is null.n");
+            fflush(stderr);
+        } else {
+            fprintf(stderr, "evp_cipher_sha1 cipher found.\n");
+            fflush(stderr);
+        }
+        if (NULL == evp_cipher_sha224) {
+            fprintf(stderr, "evp_cipher_sha224 cipher is null.n");
+            fflush(stderr);
+        } else {
+            fprintf(stderr, "evp_cipher_sha224 cipher found.\n");
+            fflush(stderr);
+        }
+        if (NULL == evp_cipher_sha256) {
+            fprintf(stderr, "evp_cipher_sha256 cipher is null.n");
+            fflush(stderr);
+        } else {
+            fprintf(stderr, "evp_cipher_sha256 cipher found.\n");
+            fflush(stderr);
+        }
+        if (NULL == evp_cipher_sha384) {
+            fprintf(stderr, "evp_cipher_sha384 cipher is null.n");
+            fflush(stderr);
+        } else {
+            fprintf(stderr, "evp_cipher_sha384 cipher found.\n");
+            fflush(stderr);
+        }
+        if (NULL == evp_cipher_sha512) {
+            fprintf(stderr, "evp_cipher_sha512 cipher is null.n");
+            fflush(stderr);
+        } else {
+            fprintf(stderr, "evp_cipher_sha512 cipher found.\n");
+            fflush(stderr);
+        }
+
 
         return ossl_ver;
     }
@@ -922,19 +970,24 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestCreateCon
 
     switch (algoIdx) {
         case jdk_crypto_jniprovider_NativeCrypto_SHA1_160:
-            digestAlg = (*OSSL_sha1)();
+            //digestAlg = (*OSSL_sha1)();
+            digestAlg = (const EVP_MD *)evp_cipher_sha1;
             break;
         case jdk_crypto_jniprovider_NativeCrypto_SHA2_224:
-            digestAlg = (*OSSL_sha224)();
+            //digestAlg = (*OSSL_sha224)();
+            digestAlg = (const EVP_MD *)evp_cipher_sha224;
             break;
         case jdk_crypto_jniprovider_NativeCrypto_SHA2_256:
-            digestAlg = (*OSSL_sha256)();
+            //digestAlg = (*OSSL_sha256)();
+            digestAlg = (const EVP_MD *)evp_cipher_sha256;
             break;
         case jdk_crypto_jniprovider_NativeCrypto_SHA5_384:
-            digestAlg = (*OSSL_sha384)();
+            //digestAlg = (*OSSL_sha384)();
+            digestAlg = (const EVP_MD *)evp_cipher_sha384;
             break;
         case jdk_crypto_jniprovider_NativeCrypto_SHA5_512:
-            digestAlg = (*OSSL_sha512)();
+            //digestAlg = (*OSSL_sha512)();
+            digestAlg = (const EVP_MD *)evp_cipher_sha512;
             break;
         default:
             return -1;
@@ -3093,19 +3146,24 @@ Java_jdk_crypto_jniprovider_NativeCrypto_PBEDerive
 
     switch (hashAlgorithm) {
         case jdk_crypto_jniprovider_NativeCrypto_SHA1_160:
-            digestAlgorithm = (*OSSL_sha1)();
+            //digestAlgorithm = (*OSSL_sha1)();
+            digestAlgorithm = (const EVP_MD *)evp_cipher_sha1;
             break;
         case jdk_crypto_jniprovider_NativeCrypto_SHA2_224:
-            digestAlgorithm = (*OSSL_sha224)();
+            //digestAlgorithm = (*OSSL_sha224)();
+            digestAlgorithm = (const EVP_MD *)evp_cipher_sha224;
             break;
         case jdk_crypto_jniprovider_NativeCrypto_SHA2_256:
-            digestAlgorithm = (*OSSL_sha256)();
+            //digestAlgorithm = (*OSSL_sha256)();
+            digestAlgorithm = (const EVP_MD *)evp_cipher_sha256;
             break;
         case jdk_crypto_jniprovider_NativeCrypto_SHA5_384:
-            digestAlgorithm = (*OSSL_sha384)();
+            //digestAlgorithm = (*OSSL_sha384)();
+            digestAlgorithm = (const EVP_MD *)evp_cipher_sha384;
             break;
         case jdk_crypto_jniprovider_NativeCrypto_SHA5_512:
-            digestAlgorithm = (*OSSL_sha512)();
+            //digestAlgorithm = (*OSSL_sha512)();
+            digestAlgorithm = (const EVP_MD *)evp_cipher_sha512;
             break;
         default:
             goto cleanup;
