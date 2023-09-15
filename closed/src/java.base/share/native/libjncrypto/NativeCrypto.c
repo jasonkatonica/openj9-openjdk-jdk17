@@ -179,6 +179,7 @@ typedef int OSSL_CRYPTO_THREADID_set_callback_t(void (*threadid_func)(CRYPTO_THR
 typedef void OSSL_CRYPTO_set_locking_callback_t(void (*func)(int mode, int type, const char *file, int line));
 
 typedef OSSL_cipher_t* OSSL_cipher_fetch_t(OSSL_LIB_CTX *, const char *, const char *);
+typedef OSSL_sha_t* OSSL_md_fetch_t(OSSL_LIB_CTX *, const char *, const char *);
 
 static int thread_setup();
 #if defined(WINDOWS)
@@ -228,6 +229,7 @@ OSSL_CipherFinal_ex_t* OSSL_CipherFinal_ex;
 
 /* Define pointer for OpenSSL cipher fetching functions. */
 OSSL_cipher_fetch_t* OSSL_cipher_fetch;
+OSSL_md_fetch_t* OSSL_md_fetch;
 
 /* Define pointers for OpenSSL functions to handle GCM algorithm. */
 //OSSL_cipher_t* OSSL_aes_128_gcm;
@@ -620,6 +622,12 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
             fprintf(stderr, "OSSL_cipher_fetch function pointer is NULL.");
             fflush(stderr);
     }
+        /* Load the function pointer for OpenSSL EVP_md_fetch API. */
+    OSSL_md_fetch = (OSSL_md_fetch*)find_crypto_symbol(crypto_library, "EVP_MD_fetch");
+    if (NULL == OSSL_md_fetch) {
+            fprintf(stderr, "OSSL_md_fetch function pointer is NULL.");
+            fflush(stderr);
+    }
 
     if ((NULL == OSSL_error_string) ||
         (NULL == OSSL_error_string_n) ||
@@ -649,6 +657,7 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
         //(NULL == OSSL_aes_192_gcm) ||
         //(NULL == OSSL_aes_256_gcm) ||
         (NULL == OSSL_cipher_fetch) ||
+        (NULL == OSSL_md_fetch) ||
         (NULL == OSSL_CIPHER_CTX_ctrl) ||
         (NULL == OSSL_DecryptInit_ex) ||
         (NULL == OSSL_DecryptUpdate) ||
@@ -748,11 +757,11 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
         evp_aesgcm_cipher_192 = (void*)(*OSSL_cipher_fetch)((OSSL_LIB_CTX *)NULL, (const char*)"AES-192-GCM", (const char*)NULL);
         evp_aesgcm_cipher_256 = (void*)(*OSSL_cipher_fetch)((OSSL_LIB_CTX *)NULL, (const char*)"AES-256-GCM", (const char*)NULL);
 
-        evp_cipher_sha1 = (void*)(*OSSL_cipher_fetch)((OSSL_LIB_CTX *)NULL, (const char*)"SHA1", (const char*)NULL);
-        evp_cipher_sha224 = (void*)(*OSSL_cipher_fetch)((OSSL_LIB_CTX *)NULL, (const char*)"SHA2-224", (const char*)NULL);
-        evp_cipher_sha256 = (void*)(*OSSL_cipher_fetch)((OSSL_LIB_CTX *)NULL, (const char*)"SHA2-256", (const char*)NULL);
-        evp_cipher_sha384 = (void*)(*OSSL_cipher_fetch)((OSSL_LIB_CTX *)NULL, (const char*)"SHA2-384", (const char*)NULL);
-        evp_cipher_sha512 = (void*)(*OSSL_cipher_fetch)((OSSL_LIB_CTX *)NULL, (const char*)"SHA2-512", (const char*)NULL);
+        evp_cipher_sha1 = (void*)(*OSSL_md_fetch)((OSSL_LIB_CTX *)NULL, (const char*)"SHA1", (const char*)NULL);
+        evp_cipher_sha224 = (void*)(*OSSL_md_fetch)((OSSL_LIB_CTX *)NULL, (const char*)"SHA2-224", (const char*)NULL);
+        evp_cipher_sha256 = (void*)(*OSSL_md_fetch)((OSSL_LIB_CTX *)NULL, (const char*)"SHA2-256", (const char*)NULL);
+        evp_cipher_sha384 = (void*)(*OSSL_md_fetch)((OSSL_LIB_CTX *)NULL, (const char*)"SHA2-384", (const char*)NULL);
+        evp_cipher_sha512 = (void*)(*OSSL_md_fetch)((OSSL_LIB_CTX *)NULL, (const char*)"SHA2-512", (const char*)NULL);
 
         if (NULL == evp_aesgcm_cipher_128)  {
             fprintf(stderr, "evp_aesgcm_cipher_128 cipher is null.n");
