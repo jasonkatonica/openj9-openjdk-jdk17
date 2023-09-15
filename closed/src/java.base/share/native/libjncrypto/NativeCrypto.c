@@ -623,7 +623,7 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
             fflush(stderr);
     }
         /* Load the function pointer for OpenSSL EVP_md_fetch API. */
-    OSSL_md_fetch = (OSSL_md_fetch*)find_crypto_symbol(crypto_library, "EVP_MD_fetch");
+    OSSL_md_fetch = (OSSL_md_fetch_t*)find_crypto_symbol(crypto_library, "EVP_MD_fetch");
     if (NULL == OSSL_md_fetch) {
             fprintf(stderr, "OSSL_md_fetch function pointer is NULL.");
             fflush(stderr);
