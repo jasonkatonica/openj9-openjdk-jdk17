@@ -51,6 +51,7 @@ public final class CRIUSECProvider extends Provider {
 
         // SHA1PRNG is the default name needed by the jdk, but SHA1 is not used, rather it reads directly from /dev/random.
         putService(new Service(this, "MessageDigest", "SHA-1", packageName + "SHA", java.util.Arrays.asList(aliases), null));
+        putService(new Service(this, "MessageDigest", "SHA-256", packageName + "SHA2$SHA256", null, null));
         putService(new Service(this, "MessageDigest", "MD5", packageName + "MD5", null, null));
         putService(new Service(this, "SecureRandom", "SHA1PRNG", packageName + "NativePRNG", null, null));
     }
