@@ -53,6 +53,7 @@ public final class CRIUSECProvider extends Provider {
         putService(new Service(this, "MessageDigest", "SHA-1", packageName + "SHA", java.util.Arrays.asList(aliases), null));
         putService(new Service(this, "MessageDigest", "SHA-256", packageName + "SHA2$SHA256", null, null));
         putService(new Service(this, "MessageDigest", "MD5", packageName + "MD5", null, null));
+        putService(new Service(this, "Mac", "HmacSHA256", packageName + "HmacCore$HmacSHA256", null, null));
         putService(new Service(this, "SecureRandom", "SHA1PRNG", packageName + "NativePRNG", null, null));
     }
 
