@@ -82,7 +82,7 @@ security.provider.tbd=Apple
 #endif
 security.provider.tbd=SunPKCS11
 
-#ifdef linux-x86
+#ifdef linux-x86 || linux-ppcle || linux-s390x
 #
 # Java Restricted Security Mode
 #
