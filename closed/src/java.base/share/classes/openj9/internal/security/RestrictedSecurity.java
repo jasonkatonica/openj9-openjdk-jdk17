@@ -64,7 +64,7 @@ public final class RestrictedSecurity {
 
     private static RestrictedSecurityProperties restricts;
 
-    private static final List<String> supportPlatforms = List.of("amd64");
+    private static final List<String> supportPlatforms = List.of("amd64","ppcle","s390x");
 
     static {
         @SuppressWarnings("removal")
