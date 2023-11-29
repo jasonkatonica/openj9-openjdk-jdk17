@@ -31,6 +31,8 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.*;
 import javax.crypto.*;
 
+import openj9.internal.security.RestrictedSecurity;
+
 /**
  * This class contains a few static methods for interaction with the JCA/JCE
  * to obtain implementations, etc.
@@ -89,6 +91,11 @@ final class JsseJce {
      * JCA identifier string for ECDSA, i.e. a ECDSA with SHA-1.
      */
     static final String SIGNATURE_ECDSA = "SHA1withECDSA";
+
+    /**
+     * JCA identifier string for ECDSA, i.e. a ECDSA with SHA512.
+     */
+    static final String SIGNATURE_ECDSA_512 = "SHA512withECDSA";
 
     /**
      * JCA identifier for EdDSA signatures.
@@ -166,7 +173,18 @@ final class JsseJce {
         static {
             boolean mediator = true;
             try {
-                Signature.getInstance(SIGNATURE_ECDSA);
+                // When running in FIPS mode the signature SHA1withECDSA is not 
+                // available by default. In this scenario we should still set EC 
+                // availability to true since other algorithms in the ECDSA signature 
+                // family are available for use in various ECDSA TLS ciphers. All 
+                // FIPS solutions are expected to have the algorithm "SHA512withECDSA" 
+                // so we will check for this instead when running in FIPS mode.
+                if (RestrictedSecurity.isFIPSEnabled() == true) {
+                    Signature.getInstance(SIGNATURE_ECDSA_512);
+                } else {
+                    Signature.getInstance(SIGNATURE_ECDSA);
+                }
+
                 Signature.getInstance(SIGNATURE_RAWECDSA);
                 KeyAgreement.getInstance("ECDH");
                 KeyFactory.getInstance("EC");
