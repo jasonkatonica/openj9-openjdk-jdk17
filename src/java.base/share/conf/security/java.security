@@ -154,8 +154,13 @@ RestrictedSecurity.NSS.140-2.securerandom.algorithm = PKCS11
 #endif
 
 #if defined aix-ppc || defined linux-ppc || defined linux-s390 || defined linux-x86 || defined windows
-RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.name = OpenJCEPlusFIPS Cryptographic Module FIPS 140-3
-RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.default = true
+# Loose RestrictedSecurity mode profile for FIPS 140-3. This profile allows for all algorithms
+# within the OpenJCEPlusFIPS provider to be callable, even though algorithms may or may not be allowable
+# according to the security policy described below. This profile also includes non cryptographic algorithms
+# and common configuration options that MAY be allowable under certain NIST circumstances depending on
+# application deployments. For example PKCS12 files are pre-configured.
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.name = Loose OpenJCEPlusFIPS Cryptographic Module FIPS 140-3
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.default = false
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.fips = true
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.number = Certificate #XXX
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
@@ -203,9 +208,113 @@ RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.provider.2 = SUN [{CertificateF
     {Configuration, JavaLoginConfig, *}, \
     {Policy, JavaPolicy, *}]
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.provider.3 = SunJSSE
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.provider.4 = SunJCE [{AlgorithmParameters, PBES2, *}, \
+    {AlgorithmParameters, PBEWithHmacSHA256AndAES_256, *}, \
+    {SecretKeyFactory, PBEWithMD5AndDES, *}, \
+    {SecretKeyFactory, PBKDF2WithHmacSHA256, *}, \
+    {Cipher, PBEWithHmacSHA256AndAES_256, *}, \
+    {Mac, HmacPBESHA256, *}]
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.javax.net.ssl.keyStore = NONE
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.securerandom.provider = OpenJCEPlusFIPS
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.securerandom.algorithm = SHA512DRBG
+
+# Strict RestrictedSecurity mode profile for FIPS 140-3. This policy represents only allowable
+# approved cryptography in the OpenJCEPlusFIPS provider along with other non cryptographic algorithms
+# commonly used. This profile extends the profile "RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3" described
+# above. The following constraints represent algorithms no longer allowable in this strict profile
+# compared to the "RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3" profile above.
+#    {MessageDigest,MD5,*}, \
+#    {MessageDigest,SHA-1,*}, \
+#    {MessageDigest,SHA-512/224,*}, \
+#    {Signature,SHA1withRSA,*}, \
+#    {Signature,RSAforSSL,*}, \
+#    {Signature,NONEwithDSA,*}, \
+#    {Signature,NONEwithECDSA,*}, \
+#    {Signature,NONEwithRSA,*}, \
+#    {KeyAgreement,DiffieHellman,*}, \
+#    {KeyPairGenerator,DiffieHellman,*}, \
+#    {AlgorithmParameterGenerator,DiffieHellman,*}, \
+#    {AlgorithmParameters,DiffieHellman,*}, \
+#    {KeyFactory,DiffieHellman,*}, \
+#    {MessageDigest,SHA-512/256,*}, \
+#    {KeyGenerator,HmacSHA3-224,*}, \
+#    {KeyGenerator,HmacSHA3-256,*}, \
+#    {KeyGenerator,HmacSHA3-384,*}, \
+#    {KeyGenerator,HmacSHA3-512,*}
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Strict.desc.name = Strict OpenJCEPlusFIPS Cryptographic Module FIPS 140-3
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Strict.extends = RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Strict.desc.default = true
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Strict.jce.provider.1 = com.ibm.crypto.plus.provider.OpenJCEPlusFIPS [ \
+    {AlgorithmParameters,AES,*}, \
+    {Cipher,AES,*}, \
+    {SecretKeyFactory,AES,*}, \
+    {KeyGenerator,AES,*}, \
+    {Cipher,AES/CCM/NoPadding,*}, \
+    {AlgorithmParameters, CCM, *}, \
+    {AlgorithmParameterGenerator, CCM, *}, \
+    {Cipher,AES/GCM/NoPadding,*}, \
+    {AlgorithmParameters, GCM, *}, \
+    {AlgorithmParameterGenerator, GCM, *}, \
+    {AlgorithmParameterGenerator, AESGCM, *}, \
+    {KeyFactory,DSA,*}, \
+    {Signature,SHA224withDSA,*}, \
+    {Signature,SHA256withDSA,*}, \
+    {AlgorithmParameters,DSA,*}, \
+    {KeyFactory,EC,*}, \
+    {KeyPairGenerator,EC,*}, \
+    {AlgorithmParameters,EC,*}, \
+    {AlgorithmParameterGenerator,EC,*}, \
+    {Signature,SHA224withECDSA,*}, \
+    {Signature,SHA256withECDSA,*}, \
+    {Signature,SHA384withECDSA,*}, \
+    {Signature,SHA512withECDSA,*}, \
+    {SecureRandom,SHA256DRBG,*}, \
+    {SecureRandom,SHA512DRBG,*}, \
+    {Mac,HmacSHA224,*}, \
+    {Mac,HmacSHA256,*}, \
+    {Mac,HmacSHA384,*}, \
+    {Mac,HmacSHA512,*}, \
+    {Mac,HmacSHA3-224,*}, \
+    {Mac,HmacSHA3-256,*}, \
+    {Mac,HmacSHA3-384,*}, \
+    {Mac,HmacSHA3-512,*}, \
+    {KeyGenerator,kda-hkdf-with-sha224,*}, \
+    {KeyGenerator,kda-hkdf-with-sha256,*}, \
+    {KeyGenerator,kda-hkdf-with-sha384,*}, \
+    {KeyGenerator,kda-hkdf-with-sha512,*}, \
+    {KeyGenerator,SunTls12KeyMaterial,*}, \
+    {KeyGenerator,SunTls12Prf,*}, \
+    {KeyGenerator,SunTls12RsaPremasterSecret,*}, \
+    {KeyGenerator,SunTlsPrf,*}, \
+    {KeyGenerator,SunTlsRsaPremasterSecret,*}, \
+    {KeyGenerator,SunTls12MasterSecret,*}, \
+    {KeyGenerator,SunTlsMasterSecret,*}, \
+    {KeyGenerator,SunTlsKeyMaterial,*}, \
+    {KeyGenerator,HmacSHA224,*}, \
+    {KeyGenerator,HmacSHA256,*}, \
+    {KeyGenerator,HmacSHA384,*}, \
+    {KeyGenerator,HmacSHA512,*}, \
+    {KeyPairGenerator,RSA,*}, \
+    {KeyFactory,RSA,*}, \
+    {AlgorithmParameters,OAEP,*}, \
+    {KeyPairGenerator,RSAPSS,*}, \
+    {KeyFactory,RSAPSS,*}, \
+    {AlgorithmParameters,RSAPSS,*}, \
+    {Signature,SHA224withRSA,*}, \
+    {Signature,SHA256withRSA,*}, \
+    {Signature,SHA384withRSA,*}, \
+    {Signature,SHA512withRSA,*}, \
+    {Signature,RSAPSS,*}, \
+    {KeyAgreement,ECDH,*}, \
+    {MessageDigest,SHA3-224,*}, \
+    {MessageDigest,SHA3-256,*}, \
+    {MessageDigest,SHA3-384,*}, \
+    {MessageDigest,SHA3-512,*}, \
+    {MessageDigest,SHA-224,*}, \
+    {MessageDigest,SHA-256,*}, \
+    {MessageDigest,SHA-384,*}, \
+    {MessageDigest,SHA-512,*}]
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.provider.4 =
 #endif
 
 #
