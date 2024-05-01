@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2024 All Rights Reserved
  * ===========================================================================
  */
 
@@ -44,7 +44,7 @@ import java.security.spec.*;
 import openj9.internal.criu.CRIUSECProvider;
 import openj9.internal.criu.InternalCRIUSupport;
 /*[ENDIF] CRIU_SUPPORT */
-
+import openj9.internal.security.RestrictedSecurity;
 import sun.security.x509.AlgorithmId;
 
 /**
@@ -81,11 +81,11 @@ abstract class HmacCore extends MacSpi implements Cloneable {
             // use SUN provider if the most preferred one does not support
             // cloning
             Provider sun = Security.getProvider("SUN");
-            if (sun != null) {
+            if ((sun != null) && !RestrictedSecurity.isFIPSEnabled()) {
                 md = MessageDigest.getInstance(digestAlgo, sun);
             } else {
                 String noCloneProv = md.getProvider().getName();
-                // if no Sun provider, use provider list
+                // if no Sun provider or we are in FIPS mode, use provider list
                 md = null;
                 Provider[] provs = Security.getProviders();
                 for (Provider p : provs) {
