@@ -154,11 +154,12 @@ RestrictedSecurity.NSS.140-2.securerandom.algorithm = PKCS11
 #endif
 
 #if defined aix-ppc || defined linux-ppc || defined linux-s390 || defined linux-x86 || defined windows
+#
 # Strict RestrictedSecurity mode profile for FIPS 140-3. This policy represents only allowable
 # approved cryptography in the OpenJCEPlusFIPS provider along with other non cryptographic algorithms
 # commonly used. Please note that the following constraints represent algorithms no longer allowable
-# within this strict profile as compared to the "RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Loose"
-# profile below.
+# within this strict profile for the OpenJCEPlusFIPS provider as compared to the 
+# "RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Loose" profile defined below.
 #    {MessageDigest,MD5,*}, \
 #    {MessageDigest,SHA-1,*}, \
 #    {MessageDigest,SHA-512/224,*}, \
@@ -177,8 +178,9 @@ RestrictedSecurity.NSS.140-2.securerandom.algorithm = PKCS11
 #    {KeyGenerator,HmacSHA3-256,*}, \
 #    {KeyGenerator,HmacSHA3-384,*}, \
 #    {KeyGenerator,HmacSHA3-512,*}
+#
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.name = OpenJCEPlusFIPS Cryptographic Module FIPS 140-3
-RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.default = true
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.default = false
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.fips = true
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.number = Certificate #XXX
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
@@ -301,21 +303,28 @@ RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.javax.net.ssl.keyStore = NONE
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.securerandom.provider = OpenJCEPlusFIPS
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.securerandom.algorithm = SHA512DRBG
 
+#
 # Loose RestrictedSecurity mode profile for FIPS 140-3. This profile allows for all algorithms
 # within the OpenJCEPlusFIPS provider to be callable, even though algorithms may or may not be allowable
 # according to the security policy described below and depending on how algorithms are used. This profile
 # also includes non cryptographic algorithms and common configuration options that MAY be allowable
 # under certain NIST circumstances depending on application deployments. For example PKCS12 files are pre-configured.
+#
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Loose.desc.name = Loose OpenJCEPlusFIPS Cryptographic Module FIPS 140-3
-RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Loose.desc.default = false
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Loose.desc.default = true
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Loose.extends = RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Loose.jce.provider.1 = com.ibm.crypto.plus.provider.OpenJCEPlusFIPS
-RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Loose.jce.provider.4 = SunJCE [{AlgorithmParameters, PBES2, *}, \
-    {AlgorithmParameters, PBEWithHmacSHA256AndAES_256, *}, \
-    {SecretKeyFactory, PBEWithMD5AndDES, *}, \
-    {SecretKeyFactory, PBKDF2WithHmacSHA256, *}, \
-    {Cipher, PBEWithHmacSHA256AndAES_256, *}, \
-    {Mac, HmacPBESHA256, *}]
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Loose.jce.provider.2 = SUN
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Loose.jce.provider.3 = SunRsaSign
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Loose.jce.provider.4 = SunEC
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Loose.jce.provider.5 = SunJSSE
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Loose.jce.provider.6 = SunJCE
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Loose.jce.provider.7 = SunJGSS
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Loose.jce.provider.8 = SunSASL
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Loose.jce.provider.9 = XMLDSig
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Loose.jce.provider.10 = SunPCSC
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Loose.jce.provider.11 = JdkLDAP
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Loose.jce.provider.12 = JdkSASL
 #endif
 
 #
