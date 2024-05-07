@@ -178,8 +178,6 @@ RestrictedSecurity.NSS.140-2.securerandom.algorithm = PKCS11
 #    {KeyGenerator,HmacSHA3-384,*}, \
 #    {KeyGenerator,HmacSHA3-512,*}
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.name = OpenJCEPlusFIPS Cryptographic Module FIPS 140-3
-RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.extends = RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Loose
-
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.default = true
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.fips = true
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.number = Certificate #XXX
@@ -217,6 +215,7 @@ RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.tls.disabledAlgorithms = \
     X448
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.tls.ephemeralDHKeySize =
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.tls.legacyAlgorithms =
+
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.certpath.disabledAlgorithms =
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.legacyAlgorithms =
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.provider.1 = com.ibm.crypto.plus.provider.OpenJCEPlusFIPS [ \
