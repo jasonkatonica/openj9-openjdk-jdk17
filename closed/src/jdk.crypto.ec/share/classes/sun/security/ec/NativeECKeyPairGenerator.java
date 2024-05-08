@@ -192,7 +192,15 @@ public final class NativeECKeyPairGenerator extends KeyPairGeneratorSpi {
         }
 
         // Not all known curves are supported by the native implementation
-        ECKeyPairGenerator.ensureCurveIsSupported(ecSpec);
+        try{
+            ECKeyPairGenerator.ensureCurveIsSupported(ecSpec);
+        } catch (InvalidAlgorithmParameterException iape) {
+            String curveName = ECUtil.getCurveName(null, ecSpec);
+            if (!"brainpoolP512r1".equals(curveName)) {
+                throw iape;
+            }
+        }
+
         this.params = ecSpec;
 
         this.keySize = ecSpec.getCurve().getField().getFieldSize();
