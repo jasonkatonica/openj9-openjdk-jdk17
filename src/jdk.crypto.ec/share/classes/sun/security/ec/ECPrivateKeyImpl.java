@@ -23,12 +23,6 @@
  * questions.
  */
 
-/*
- * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
- * ===========================================================================
- */
-
 package sun.security.ec;
 
 import java.io.IOException;
@@ -79,7 +73,6 @@ public final class ECPrivateKeyImpl extends PKCS8Key implements ECPrivateKey {
     private BigInteger s;       // private value
     private byte[] arrayS;      // private value as a little-endian array
     private ECParameterSpec params;
-    private long nativeECKey;
 
     /**
      * Construct a key from its encoding. Called by the ECKeyFactory.
@@ -233,37 +226,5 @@ public final class ECPrivateKeyImpl extends PKCS8Key implements ECPrivateKey {
             throws IOException, ClassNotFoundException {
         throw new InvalidObjectException(
                 "ECPrivateKeyImpl keys are not directly deserializable");
-    }
-
-    /**
-     * Returns the native EC public key context pointer.
-     * @return the native EC public key context pointer or -1 on error
-     */
-    long getNativePtr() {
-        if (this.nativeECKey == 0x0) {
-            synchronized (this) {
-                if (this.nativeECKey == 0x0) {
-                    if (nativeCrypto == null) {
-                        nativeCrypto = NativeCrypto.getNativeCrypto();
-                    }
-                    long nativePointer = NativeECUtil.encodeGroup(this.params);
-                    try {
-                        if (nativePointer != -1) {
-                            byte[] value = this.getS().toByteArray();
-                            if (nativeCrypto.ECCreatePrivateKey(nativePointer, value, value.length) == -1) {
-                                nativeCrypto.ECDestroyKey(nativePointer);
-                                nativePointer = -1;
-                            }
-                        }
-                    } finally {
-                        if (nativePointer != -1) {
-                            nativeCrypto.createECKeyCleaner(this, nativePointer);
-                        }
-                    }
-                    this.nativeECKey = nativePointer;
-                }
-            }
-        }
-        return this.nativeECKey;
     }
 }
