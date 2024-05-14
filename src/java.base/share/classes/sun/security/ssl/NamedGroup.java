@@ -180,6 +180,12 @@ enum NamedGroup {
             ProtocolVersion.PROTOCOLS_TO_13,
             CurveDB.lookup("secp521r1")),
 
+    //Brainpool named curve definition as per RFC 8734.
+    BRAINPOOLP512_R1TLS13(0x0021, "brainpoolP512r1tls13",
+            NamedGroupSpec.NAMED_GROUP_ECDHE,
+            ProtocolVersion.PROTOCOLS_OF_13,
+            CurveDB.lookup("brainpoolP512r1")),
+
     // x25519 and x448 (RFC 8422/8446)
     X25519(0x001D, "x25519",
             NamedGroupSpec.NAMED_GROUP_XDH,

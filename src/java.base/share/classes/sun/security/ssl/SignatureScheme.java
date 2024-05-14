@@ -63,6 +63,12 @@ enum SignatureScheme {
                                     "EC",
                                     NamedGroup.SECP521_R1,
                                     ProtocolVersion.PROTOCOLS_TO_13),
+    // Brainpool signature defintion for curve ecdsa_brainpoolP512r1tls13_sha512 as per RFC 8734.
+    ECDSA_BRAINPOOLP512R1TLS13_SHA512  (0x081C, "ecdsa_brainpoolP512r1tls13_sha512",
+                                    "SHA512withECDSA",
+                                    "EC",
+                                    NamedGroup.BRAINPOOLP512_R1TLS13,
+                                    ProtocolVersion.PROTOCOLS_OF_13),
 
     // EdDSA algorithms
     ED25519                 (0x0807, "ed25519", "Ed25519",
