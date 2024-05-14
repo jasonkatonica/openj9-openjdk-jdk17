@@ -31,6 +31,7 @@
  * @summary Use two key share entries
  * @run main/othervm ClientHelloKeyShares 29 23
  * @run main/othervm -Djdk.tls.namedGroups=secp384r1,secp521r1,x448,ffdhe2048 ClientHelloKeyShares 24 30
+ * @run main/othervm -Djdk.tls.namedGroups=brainpoolP512r1tls13,brainpoolP512r1tls13,x448,ffdhe2048 ClientHelloKeyShares 24 30
  * @run main/othervm -Djdk.tls.namedGroups=sect163k1,sect163r1,x25519 ClientHelloKeyShares 29
  * @run main/othervm -Djdk.tls.namedGroups=sect163k1,sect163r1,secp256r1 ClientHelloKeyShares 23
  * @run main/othervm -Djdk.tls.namedGroups=sect163k1,sect163r1,ffdhe2048,ffdhe3072,ffdhe4096 ClientHelloKeyShares 256
