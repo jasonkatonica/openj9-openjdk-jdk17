@@ -60,6 +60,7 @@ import sun.security.ec.point.AffinePoint;
 import sun.security.ec.point.Point;
 import sun.security.util.ArrayUtil;
 import sun.security.util.CurveDB;
+import sun.security.util.ECUtil;
 import sun.security.util.NamedCurve;
 import sun.security.util.math.ImmutableIntegerModuloP;
 
@@ -117,13 +118,19 @@ public final class NativeECDHKeyAgreement extends KeyAgreementSpi {
         /* attempt to translate the key if it is not an ECKey */
         ECKey ecKey = ECKeyFactory.toECKey(key);
         if (ecKey instanceof ECPrivateKey ecPrivateKey) {
-            Optional<ECOperations> opsOpt =
-                ECOperations.forParameters(ecPrivateKey.getParams());
-            if (opsOpt.isEmpty()) {
-                NamedCurve nc = CurveDB.lookup(ecPrivateKey.getParams());
-                throw new InvalidAlgorithmParameterException(
+            Optional<ECOperations> opsOpt = null;
+            try {
+                opsOpt = ECOperations.forParameters(ecPrivateKey.getParams());
+                if (opsOpt.isEmpty()) {
+                    NamedCurve nc = CurveDB.lookup(ecPrivateKey.getParams());
+                    throw new InvalidAlgorithmParameterException(
                         "Curve not supported: " +
                         ((nc != null) ? nc.toString() : "unknown"));
+                }
+            } catch (InvalidAlgorithmParameterException iape) {
+                if (!(ECUtil.isBrainpoolP512r1(ecPrivateKey.getParams()))) {
+                    throw iape;
+                }
             }
 
             this.privateKey = ecPrivateKey;
@@ -136,7 +143,12 @@ public final class NativeECDHKeyAgreement extends KeyAgreementSpi {
                 this.initializeJavaImplementation(key);
                 return;
             }
-            this.privateKeyOps = opsOpt.get();
+            
+            if (ECUtil.isBrainpoolP512r1(ecPrivateKey.getParams())) {
+                this.privateKeyOps = null;
+            } else {
+                this.privateKeyOps = opsOpt.get();
+            }
 
             ECParameterSpec params = this.privateKey.getParams();
             this.curve = NativeECUtil.getCurveName(params);
@@ -198,8 +210,10 @@ public final class NativeECDHKeyAgreement extends KeyAgreementSpi {
                 ("Key must be an instance of PublicKey");
         }
 
-        // Validate public key.
-        validate(privateKeyOps, ecKey);
+        // Validate public key when we are not making use of a brainpoolP512r1 based key.
+        if (!(ECUtil.isBrainpoolP512r1(this.privateKey.getParams()))) {
+            validate(privateKeyOps, ecKey);
+        }
 
         this.publicKey = ecKey;
         this.nativePublicKey = NativeECUtil.getPublicKeyNativePtr(ecKey);

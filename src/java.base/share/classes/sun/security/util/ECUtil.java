@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * ===========================================================================
+ */
+
 package sun.security.util;
 
 import jdk.internal.access.SharedSecrets;
@@ -342,6 +348,15 @@ public final class ECUtil {
         BigInteger right = x.pow(3).add(spec.getCurve().getA().multiply(x)).add(spec.getCurve().getB()).mod(p);
         if (!left.equals(right)) {
             throw new InvalidKeyException("Public point is not on the curve");
+        }
+    }
+
+    public static boolean isBrainpoolP512r1(ECParameterSpec name) {
+        String[] nameAndAliases = CurveDB.lookup(name).getNameAndAliases();
+        if (Arrays.asList(nameAndAliases).contains("brainpoolP512r1")) {
+            return true;
+        } else {
+            return false;
         }
     }
 

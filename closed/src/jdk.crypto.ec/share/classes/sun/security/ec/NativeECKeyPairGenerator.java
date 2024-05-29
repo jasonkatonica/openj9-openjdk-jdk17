@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2024 All Rights Reserved
  * ===========================================================================
  */
 
@@ -51,7 +51,6 @@ import java.security.spec.ECField;
 import java.security.spec.ECFieldFp;
 import java.security.spec.ECFieldF2m;
 import java.security.spec.InvalidParameterSpecException;
-import java.util.Arrays;
 
 import jdk.crypto.jniprovider.NativeCrypto;
 
@@ -59,6 +58,7 @@ import sun.security.ec.point.*;
 import sun.security.jca.JCAUtil;
 import sun.security.provider.Sun;
 import sun.security.util.ECUtil;
+import sun.security.action.GetPropertyAction;
 
 import static sun.security.ec.ECOperations.IntermediateValueException;
 import static sun.security.util.SecurityProviderConstants.DEF_EC_KEY_SIZE;
@@ -88,6 +88,8 @@ public final class NativeECKeyPairGenerator extends KeyPairGeneratorSpi {
 
     /* the java implementation, initialized if needed */
     private ECKeyPairGenerator javaImplementation;
+
+    private static final boolean isAIX = "AIX".equals(GetPropertyAction.privilegedGetProperty("os.name"));
 
     /**
      * Constructs a new NativeECKeyPairGenerator.
@@ -138,6 +140,23 @@ public final class NativeECKeyPairGenerator extends KeyPairGeneratorSpi {
         this.random = random;
 
         this.curve = NativeECUtil.getCurveName(this.params);
+        
+        /* 
+        * Only brainpoolP512r1 curve is supported on AIX. Other curves are disabled
+        * for use with OpenSSL on AIX due to performance regressions observed. This
+        * method does not specify brainpool so use the Java implementation for 
+        * ECKeyPairGenerator instead.
+        */
+        if (isAIX) {
+            /* Disabling OpenSSL usage on AIX due to performance regression observed. */
+            if (nativeCryptTrace) {
+                System.err.println("Not using OpenSSL integration on AIX.");
+            }
+            this.javaImplementation = new ECKeyPairGenerator();
+            this.javaImplementation.initialize(this.keySize, this.random);
+            return;
+        }
+
         if ((this.curve != null) && NativeECUtil.isCurveSupported(this.curve, this.params)) {
             this.javaImplementation = null;
         } else {
@@ -192,13 +211,30 @@ public final class NativeECKeyPairGenerator extends KeyPairGeneratorSpi {
         }
 
         // Not all known curves are supported by the native implementation
-        ECKeyPairGenerator.ensureCurveIsSupported(ecSpec);
+        try{
+            ECKeyPairGenerator.ensureCurveIsSupported(ecSpec);
+        } catch (InvalidAlgorithmParameterException iape) {
+            if (!(ECUtil.isBrainpoolP512r1(ecSpec))) {
+                throw iape;
+            }
+        }
+
         this.params = ecSpec;
 
         this.keySize = ecSpec.getCurve().getField().getFieldSize();
         this.random = random;
 
         this.curve = NativeECUtil.getCurveName(this.params);
+        
+        /* Disabling OpenSSL usage on AIX due to performance regression observed. */
+        if (isAIX && !curve.equalsIgnoreCase("brainpoolP512r1")) {
+            if (nativeCryptTrace) {
+                System.err.println("Not using OpenSSL integration on AIX, only curve brainpoolP512r1 supported.");
+            }
+            this.initializeJavaImplementation();
+            return;
+        }
+
         if ((this.curve != null) && (NativeECUtil.isCurveSupported(this.curve, this.params))) {
             this.javaImplementation = null;
         } else {
