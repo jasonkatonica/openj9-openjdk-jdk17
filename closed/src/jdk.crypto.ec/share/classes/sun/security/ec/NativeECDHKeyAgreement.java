@@ -45,6 +45,7 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.EllipticCurve;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -117,13 +118,20 @@ public final class NativeECDHKeyAgreement extends KeyAgreementSpi {
         /* attempt to translate the key if it is not an ECKey */
         ECKey ecKey = ECKeyFactory.toECKey(key);
         if (ecKey instanceof ECPrivateKey ecPrivateKey) {
-            Optional<ECOperations> opsOpt =
-                ECOperations.forParameters(ecPrivateKey.getParams());
-            if (opsOpt.isEmpty()) {
-                NamedCurve nc = CurveDB.lookup(ecPrivateKey.getParams());
-                throw new InvalidAlgorithmParameterException(
+            Optional<ECOperations> opsOpt = null;
+            try {
+                opsOpt = ECOperations.forParameters(ecPrivateKey.getParams());
+                if (opsOpt.isEmpty()) {
+                    NamedCurve nc = CurveDB.lookup(ecPrivateKey.getParams());
+                    throw new InvalidAlgorithmParameterException(
                         "Curve not supported: " +
                         ((nc != null) ? nc.toString() : "unknown"));
+                }
+            } catch (InvalidAlgorithmParameterException iape) {
+                String[] nameAndAliases = CurveDB.lookup(ecPrivateKey.getParams()).getNameAndAliases();
+                if (!Arrays.asList(nameAndAliases).contains("brainpoolP512r1")) {
+                    throw iape;
+                }
             }
 
             this.privateKey = ecPrivateKey;
