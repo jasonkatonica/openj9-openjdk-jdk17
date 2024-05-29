@@ -50,10 +50,12 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
+import java.util.Arrays;
 import java.util.Optional;
 
 import jdk.crypto.jniprovider.NativeCrypto;
 import sun.security.provider.Sun;
+import sun.security.util.CurveDB;
 import sun.security.util.ECUtil;
 
 /**
@@ -564,8 +566,8 @@ abstract class NativeECDSASignature extends SignatureSpi {
             ECDSAOperations.forParameters(params)
                     .orElseThrow(() -> new SignatureException("Curve not supported: " + params));
         } catch (SignatureException se) {
-            String curveName = ECUtil.getCurveName(null, ecSpec);
-            if (!"brainpoolP512r1".equals(curveName)) {
+            String[] nameAndAliases = CurveDB.lookup(params).getNameAndAliases();
+            if (!Arrays.asList(nameAndAliases).contains("brainpoolP512r1")) {
                 throw se;
             }
         }
@@ -610,12 +612,13 @@ abstract class NativeECDSASignature extends SignatureSpi {
             return false;
         }
 
+        ECDSAOperations ops = null;
         try{
-            ECDSAOperations ops = ECDSAOperations.forParameters(params)
+            ops = ECDSAOperations.forParameters(params)
                     .orElseThrow(() -> new SignatureException("Curve not supported: " + params));
         } catch (SignatureException se) {
-            String curveName = ECUtil.getCurveName(null, ecSpec);
-            if (!"brainpoolP512r1".equals(curveName)) {
+            String[] nameAndAliases = CurveDB.lookup(params).getNameAndAliases();
+            if (!Arrays.asList(nameAndAliases).contains("brainpoolP512r1")) {
                 throw se;
             }
         }
