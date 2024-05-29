@@ -144,7 +144,13 @@ public final class NativeECDHKeyAgreement extends KeyAgreementSpi {
                 this.initializeJavaImplementation(key);
                 return;
             }
-            this.privateKeyOps = opsOpt.get();
+            
+            String[] nameAndAliases = CurveDB.lookup(ecPrivateKey.getParams()).getNameAndAliases();
+            if (!Arrays.asList(nameAndAliases).contains("brainpoolP512r1")) {
+                this.privateKeyOps = opsOpt.get();
+            } else {
+                this.privateKeyOps = null;
+            }
 
             ECParameterSpec params = this.privateKey.getParams();
             this.curve = NativeECUtil.getCurveName(params);
@@ -206,8 +212,11 @@ public final class NativeECDHKeyAgreement extends KeyAgreementSpi {
                 ("Key must be an instance of PublicKey");
         }
 
-        // Validate public key.
-        validate(privateKeyOps, ecKey);
+        // Validate public key when we are not making use of a brainpoolP512r1 based key.
+        String[] nameAndAliases = CurveDB.lookup(this.privateKey.getParams()).getNameAndAliases();
+        if (!Arrays.asList(nameAndAliases).contains("brainpoolP512r1")) {
+            validate(privateKeyOps, ecKey);
+        }
 
         this.publicKey = ecKey;
         this.nativePublicKey = NativeECUtil.getPublicKeyNativePtr(ecKey);
