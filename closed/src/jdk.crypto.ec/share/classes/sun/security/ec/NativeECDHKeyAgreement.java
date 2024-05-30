@@ -128,8 +128,7 @@ public final class NativeECDHKeyAgreement extends KeyAgreementSpi {
                         ((nc != null) ? nc.toString() : "unknown"));
                 }
             } catch (InvalidAlgorithmParameterException iape) {
-                String[] nameAndAliases = CurveDB.lookup(ecPrivateKey.getParams()).getNameAndAliases();
-                if (!Arrays.asList(nameAndAliases).contains("brainpoolP512r1")) {
+                if (!(isBrainpoolP512r1(ecPrivateKey.getParams()))) {
                     throw iape;
                 }
             }
@@ -145,11 +144,10 @@ public final class NativeECDHKeyAgreement extends KeyAgreementSpi {
                 return;
             }
             
-            String[] nameAndAliases = CurveDB.lookup(ecPrivateKey.getParams()).getNameAndAliases();
-            if (!Arrays.asList(nameAndAliases).contains("brainpoolP512r1")) {
-                this.privateKeyOps = opsOpt.get();
-            } else {
+            if (isBrainpoolP512r1(ecPrivateKey.getParams())) {
                 this.privateKeyOps = null;
+            } else {
+                this.privateKeyOps = opsOpt.get();
             }
 
             ECParameterSpec params = this.privateKey.getParams();
@@ -213,8 +211,7 @@ public final class NativeECDHKeyAgreement extends KeyAgreementSpi {
         }
 
         // Validate public key when we are not making use of a brainpoolP512r1 based key.
-        String[] nameAndAliases = CurveDB.lookup(this.privateKey.getParams()).getNameAndAliases();
-        if (!Arrays.asList(nameAndAliases).contains("brainpoolP512r1")) {
+        if (!(isBrainpoolP512r1(this.privateKey.getParams()))) {
             validate(privateKeyOps, ecKey);
         }
 
@@ -376,5 +373,14 @@ public final class NativeECDHKeyAgreement extends KeyAgreementSpi {
     private void initializeJavaImplementation(Key key) throws InvalidKeyException {
         this.javaImplementation = new ECDHKeyAgreement();
         this.javaImplementation.engineInit(key, null);
+    }
+
+    private boolean isBrainpoolP512r1(ECParameterSpec name) {
+        String[] nameAndAliases = CurveDB.lookup(name).getNameAndAliases();
+        if (Arrays.asList(nameAndAliases).contains("brainpoolP512r1")) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
