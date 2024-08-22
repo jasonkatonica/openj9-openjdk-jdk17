@@ -111,7 +111,7 @@ public final class StripNativeDebugSymbolsPlugin extends AbstractPlugin {
                                                         stripBin);
         in.transformAndCopy((resource) -> {
             ResourcePoolEntry res = resource;
-            if (needsStripTransformation(resource)) {
+            if (shouldStrip(resource)) {
                 Optional<StrippedDebugInfoBinary> strippedBin = builder.build(resource);
                 if (strippedBin.isPresent()) {
                     StrippedDebugInfoBinary sb = strippedBin.get();
@@ -144,23 +144,25 @@ public final class StripNativeDebugSymbolsPlugin extends AbstractPlugin {
      * any modifications to the native library. Performing any modifications to the library
      * in any way, causes the FIPS library to fail to load due to a self verification check made.
      *
-     * @param resource the resource to examine for stripping eligibility.
-     * @return return true if stripping should be done on a particular resource, false otherwise.
+     * @param resource the resource to examine for stripping eligibility
+     * @return return true if stripping should be done on a particular resource, false otherwise
      */
-    private boolean needsStripTransformation(ResourcePoolEntry resource) {
-        if ((resource.type() == ResourcePoolEntry.Type.NATIVE_LIB &&
-            resource.path().endsWith(SHARED_LIBS_EXT)) ||
-            resource.type() == ResourcePoolEntry.Type.NATIVE_CMD) {
-            if (resource.moduleName().equals("openjceplus") &&
-                resource.path().endsWith(SHARED_LIBS_EXT) &&
-                resource.path().contains("C/icc")) {
-                return false;
-            } else {
-                return true;
+    private static boolean shouldStrip(ResourcePoolEntry resource) {
+        switch (resource.type()) {
+        case NATIVE_CMD:
+            return true;
+        case NATIVE_LIB:
+            String path = resource.path();
+            if (path.endsWith(SHARED_LIBS_EXT)) {
+                if (!(resource.moduleName().equals("openjceplus") && path.contains("/C/icc/"))) {
+                    return true;
+                }
             }
-        } else {
-            return false;
+            break;
+        default:
+            break;
         }
+        return false;
     }
 
     private void logError(ResourcePoolEntry resource, String msgKey) {
