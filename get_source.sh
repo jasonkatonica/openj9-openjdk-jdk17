@@ -83,7 +83,7 @@ configure_defaults() {
 
 	#          folder       URL                                               branch          options
 	#          ------       ---                                               ------          -------
-	add_source openj9       https://github.com/eclipse-openj9/openj9.git      $openj9_branch
+	add_source openj9       https://github.com/ibmruntimes/semeru-openj9.git  ifix-17.0.14.7_APAR-IJ53953_20250319_01
 	add_source omr          https://github.com/eclipse-openj9/openj9-omr.git  $omr_branch
 
 	add_source OpenJCEPlus  https://github.com/ibmruntimes/OpenJCEPlus.git
