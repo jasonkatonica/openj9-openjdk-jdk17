@@ -166,7 +166,6 @@ final class JsseJce {
         static {
             boolean mediator = true;
             try {
-                Signature.getInstance(SIGNATURE_ECDSA);
                 Signature.getInstance(SIGNATURE_RAWECDSA);
                 KeyAgreement.getInstance("ECDH");
                 KeyFactory.getInstance("EC");
