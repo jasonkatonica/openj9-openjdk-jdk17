@@ -572,11 +572,10 @@ enum SignatureScheme {
             if (keySize >= ss.minimalKeySize &&
                     keyAlgorithm.equalsIgnoreCase(ss.keyAlgorithm) &&
                     ss.isAllowed(constraints, version, HANDSHAKE_SCOPE)) {
-                if (signingKey.getParams() instanceof NamedParameterSpec nps
+                if (KeyUtil.getParams(signingKey) instanceof NamedParameterSpec nps
                         && !ss.algorithm.equalsIgnoreCase(nps.getName())) {
-                    if (SSLLogger.isOn() &&
-                            SSLLogger.isOn(
-                                    SSLLogger.Opt.HANDSHAKE_VERBOSE)) {
+                    if (SSLLogger.isOn &&
+                            SSLLogger.isOn("ssl,handshake,verbose")) {
                         SSLLogger.finest(
                                 "Ignore the signature algorithm (" + ss +
                                         "), unsupported named parameter: " +
@@ -688,7 +687,7 @@ enum SignatureScheme {
             return null;
         }
 
-        if (publicKey.getParams() instanceof NamedParameterSpec nps
+        if (KeyUtil.getParams(publicKey) instanceof NamedParameterSpec nps
                 && !algorithm.equalsIgnoreCase(nps.getName())) {
                 throw new InvalidKeyException("Unsupported named parameter: " +
                         nps.getName());
