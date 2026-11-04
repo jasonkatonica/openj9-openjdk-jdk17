@@ -601,7 +601,7 @@ final class CertificateVerify {
                 throw chc.conContext.fatal(Alert.INTERNAL_ERROR,
                     "No supported CertificateVerify signature algorithm for " +
                     x509Possession.popPrivateKey.getAlgorithm() +
-                    "  key");
+                    " key");
             }
 
             this.signatureScheme = schemeAndSigner.getKey();
@@ -911,7 +911,7 @@ final class CertificateVerify {
                 throw context.conContext.fatal(Alert.INTERNAL_ERROR,
                     "No supported CertificateVerify signature algorithm for " +
                     x509Possession.popPrivateKey.getAlgorithm() +
-                    "  key");
+                    " key");
             }
 
             this.signatureScheme = schemeAndSigner.getKey();
