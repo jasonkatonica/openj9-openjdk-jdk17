@@ -146,7 +146,7 @@ public class MLDSASigSchemeConstraints extends SSLSocketTemplate {
             }
             String expectedMessage = "failHandshakeMldsa44Disabled".equals(
                     TEST_CASE) ? "(internal_error) No supported " +
-                    "CertificateVerify signature algorithm for ML-DSA key" :
+                    "CertificateVerify signature algorithm for ML-DSA  key" :
                     "(handshake_failure) No available authentication scheme";
             assertEquals(e.getMessage(), expectedMessage);
         }

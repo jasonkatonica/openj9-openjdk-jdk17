@@ -134,8 +134,9 @@ public class MLDSACertSelection extends SSLSocketTemplate {
             if (!expectFail) {
                 throw e;
             }
+            // The JDK 17 message has two spaces before "key".
             assertEquals(e.getMessage(), "(internal_error) No supported " +
-                    "CertificateVerify signature algorithm for ML-DSA key");
+                    "CertificateVerify signature algorithm for ML-DSA  key");
         }
     }
 }

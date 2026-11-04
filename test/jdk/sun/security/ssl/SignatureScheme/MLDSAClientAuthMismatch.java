@@ -143,7 +143,7 @@ public class MLDSAClientAuthMismatch extends SSLSocketTemplate {
             }
 
             assertEquals(e.getMessage(), "(internal_error) No supported " +
-                    "CertificateVerify signature algorithm for ML-DSA key");
+                    "CertificateVerify signature algorithm for ML-DSA  key");
         }
     }
 }
